@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sigma Reborn | Eaglercraft 1.12.2</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050508;
+    --surface: #0d0d14;
+    --card: #111120;
+    --border: #1e1e38;
+    --accent: #00f0ff;
+    --accent2: #7b2fff;
+    --accent3: #ff2f6e;
+    --text: #e8e8ff;
+    --muted: #6060a0;
+    --glow: 0 0 20px rgba(0,240,255,0.4);
+    --glow2: 0 0 20px rgba(123,47,255,0.4);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px;
+    overflow-x: hidden;
+    cursor: crosshair;
+  }
+
+  /* ── SCANLINE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.12) 2px,
+      rgba(0,0,0,0.12) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 48px;
+    background: rgba(5,5,8,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: 'Orbitron', monospace;
+    font-weight: 900;
+    font-size: 1.1rem;
+    letter-spacing: 0.2em;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-transform: uppercase;
+  }
+
+  .nav-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+  }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 120px 24px 80px;
+    overflow: hidden;
+    text-align: center;
+  }
+
+  /* Grid background */
+  #hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,240,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,240,255,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridShift 20s linear infinite;
+  }
+
+  @keyframes gridShift {
+    from { background-position: 0 0; }
+    to { background-position: 60px 60px; }
+  }
+
+  /* Radial glow behind title */
+  #hero::after {
+    content: '';
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 700px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(123,47,255,0.18) 0%, rgba(0,240,255,0.08) 50%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.35em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.2s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Orbitron', monospace;
+    font-weight: 900;
+    font-size: clamp(3rem, 10vw, 7rem);
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    position: relative;
+    z-index: 1;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.4s forwards;
+  }
+
+  .hero-title span.sigma {
+    display: block;
+    background: linear-gradient(135deg, #fff 30%, var(--accent) 70%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 30px rgba(0,240,255,0.5));
+  }
+
+  .hero-title span.reborn {
+    display: block;
+    background: linear-gradient(135deg, var(--accent2) 30%, var(--accent3) 80%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 30px rgba(123,47,255,0.5));
+  }
+
+  .hero-version {
+    margin-top: 12px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    position: relative;
+    z-index: 1;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.55s forwards;
+  }
+
+  .hero-desc {
+    max-width: 560px;
+    margin: 36px auto 0;
+    font-size: 1.1rem;
+    line-height: 1.65;
+    color: rgba(232,232,255,0.7);
+    position: relative;
+    z-index: 1;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.7s forwards;
+  }
+
+  .hero-buttons {
+    display: flex;
+    gap: 16px;
+    margin-top: 48px;
+    position: relative;
+    z-index: 1;
+    flex-wrap: wrap;
+    justify-content: center;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.85s forwards;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 32px;
+    border: none;
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+
+  .btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.1);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .btn:hover::before { transform: translateX(0); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent2), var(--accent3));
+    color: #fff;
+    box-shadow: 0 0 30px rgba(123,47,255,0.5);
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 0 50px rgba(123,47,255,0.8);
+    transform: translateY(-2px);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    box-shadow: 0 0 20px rgba(0,240,255,0.15), inset 0 0 20px rgba(0,240,255,0.05);
+  }
+
+  .btn-outline:hover {
+    background: rgba(0,240,255,0.08);
+    box-shadow: 0 0 40px rgba(0,240,255,0.4), inset 0 0 30px rgba(0,240,255,0.1);
+    transform: translateY(-2px);
+  }
+
+  .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+  /* ── DIVIDER ── */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent2), var(--accent), var(--accent2), transparent);
+    opacity: 0.4;
+  }
+
+  /* ── FEATURES SLIDER ── */
+  #features {
+    padding: 100px 24px;
+    position: relative;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 64px;
+  }
+
+  .section-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.35em;
+    color: var(--accent2);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .section-title {
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    font-size: clamp(1.6rem, 4vw, 2.6rem);
+    letter-spacing: 0.05em;
+    color: var(--text);
+  }
+
+  /* Slider */
+  .slider-wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .slides {
+    position: relative;
+    height: 420px;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    gap: 40px;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(40px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .slide.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+  }
+
+  .slide.exit-left {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+
+  .slide-icon {
+    flex-shrink: 0;
+    width: 140px;
+    height: 140px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    background: var(--card);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slide-icon::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(0,240,255,0.12), transparent 70%);
+  }
+
+  .slide-icon .corner {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-color: var(--accent);
+    border-style: solid;
+  }
+  .slide-icon .corner.tl { top: 6px; left: 6px; border-width: 2px 0 0 2px; }
+  .slide-icon .corner.tr { top: 6px; right: 6px; border-width: 2px 2px 0 0; }
+  .slide-icon .corner.bl { bottom: 6px; left: 6px; border-width: 0 0 2px 2px; }
+  .slide-icon .corner.br { bottom: 6px; right: 6px; border-width: 0 2px 2px 0; }
+
+  .slide-content { flex: 1; }
+
+  .slide-number {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    margin-bottom: 8px;
+  }
+
+  .slide-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+    background: linear-gradient(90deg, #fff, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .slide-desc {
+    color: rgba(232,232,255,0.7);
+    line-height: 1.7;
+    font-size: 1rem;
+  }
+
+  .slide-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  .tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    background: rgba(0,240,255,0.05);
+  }
+
+  /* Slider controls */
+  .slider-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 40px;
+  }
+
+  .slider-btn {
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+  }
+
+  .slider-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: var(--glow);
+    background: rgba(0,240,255,0.08);
+  }
+
+  .slider-dots {
+    display: flex;
+    gap: 8px;
+  }
+
+  .dot {
+    width: 24px;
+    height: 3px;
+    background: var(--border);
+    border-radius: 99px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .dot.active {
+    background: var(--accent);
+    width: 40px;
+    box-shadow: 0 0 8px rgba(0,240,255,0.6);
+  }
+
+  /* ── STATS BAR ── */
+  #stats {
+    padding: 60px 24px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stats-grid {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1px;
+    background: var(--border);
+  }
+
+  .stat-item {
+    background: var(--surface);
+    padding: 36px 24px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: 'Orbitron', monospace;
+    font-size: 2.2rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .stat-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    margin-top: 6px;
+    text-transform: uppercase;
+  }
+
+  /* ── CTA ── */
+  #cta {
+    padding: 120px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #cta::before {
+    content: 'Σ';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Orbitron', monospace;
+    font-size: 40vw;
+    font-weight: 900;
+    color: rgba(123,47,255,0.04);
+    pointer-events: none;
+    line-height: 1;
+    user-select: none;
+  }
+
+  .cta-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-weight: 700;
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cta-sub {
+    color: rgba(232,232,255,0.55);
+    font-size: 1rem;
+    margin-bottom: 44px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cta-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 28px 48px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .footer-logo {
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+  }
+
+  .footer-note {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    nav { padding: 16px 20px; }
+    .slide { flex-direction: column; height: auto; gap: 24px; }
+    .slides { height: auto; min-height: 480px; }
+    .slide-icon { width: 100px; height: 100px; font-size: 3rem; }
+    footer { flex-direction: column; text-align: center; padding: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Σ Sigma Reborn</div>
+  <div class="nav-tag">// EAGLERCRAFT 1.12.2</div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-eyebrow">▸ Eaglercraft Client — Now Reborn</div>
+  <h1 class="hero-title">
+    <span class="sigma">SIGMA</span>
+    <span class="reborn">REBORN</span>
+  </h1>
+  <div class="hero-version">v1.12.2 — NEXT GENERATION</div>
+  <p class="hero-desc">
+    The most powerful Eaglercraft client, rebuilt from the ground up.
+    Razor-sharp modules, buttery smooth visuals, and devastating utility
+    — all wrapped in a sleek, lightweight package made for the browser.
+  </p>
+  <div class="hero-buttons">
+    <a href="https://github.com/sigma-client" class="btn btn-primary" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Download Client
+    </a>
+    <a href="https://clientdevelopment-s.pages.dev" class="btn btn-outline" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><polyline points="10 8 16 12 10 16"/>
+      </svg>
+      Play Online
+    </a>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- STATS -->
+<section id="stats">
+  <div class="stats-grid">
+    <div class="stat-item">
+      <div class="stat-value">50+</div>
+      <div class="stat-label">Modules</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">1.12.2</div>
+      <div class="stat-label">MC Version</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">0ms</div>
+      <div class="stat-label">Install Time</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">100%</div>
+      <div class="stat-label">Browser Native</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-header">
+    <div class="section-tag">// Core Modules</div>
+    <h2 class="section-title">FEATURE SHOWCASE</h2>
+  </div>
+
+  <div class="slider-wrapper">
+    <div class="slides">
+
+      <!-- Slide 1 -->
+      <div class="slide active" data-index="0">
+        <div class="slide-icon">
+          ⚔️
+          <div class="corner tl"></div><div class="corner tr"></div>
+          <div class="corner bl"></div><div class="corner br"></div>
+        </div>
+        <div class="slide-content">
+          <div class="slide-number">01 / 06</div>
+          <div class="slide-title">KillAura</div>
+          <p class="slide-desc">
+            Precision combat module with configurable range, target priority sorting,
+            multi-target support, and smooth rotation bypass. Dominate any PvP encounter
+            without breaking a sweat.
+          </p>
+          <div class="slide-tags">
+            <span class="tag">COMBAT</span>
+            <span class="tag">BYPASS</span>
+            <span class="tag">MULTI-TARGET</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 2 -->
+      <div class="slide" data-index="1">
+        <div class="slide-icon">
+          🏃
+          <div class="corner tl"></div><div class="corner tr"></div>
+          <div class="corner bl"></div><div class="corner br"></div>
+        </div>
+        <div class="slide-content">
+          <div class="slide-number">02 / 06</div>
+          <div class="slide-title">Speed & Fly</div>
+          <p class="slide-desc">
+            Advanced movement modules with multiple modes — Vanilla, Strafe, Friction, Boost.
+            Fly anywhere with NCP-aware packet manipulation that keeps you undetected on
+            most Eaglercraft servers.
+          </p>
+          <div class="slide-tags">
+            <span class="tag">MOVEMENT</span>
+            <span class="tag">ANTI-CHEAT</span>
+            <span class="tag">MULTI-MODE</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 3 -->
+      <div class="slide" data-index="2">
+        <div class="slide-icon">
+          👁️
+          <div class="corner tl"></div><div class="corner tr"></div>
+          <div class="corner bl"></div><div class="corner br"></div>
+        </div>
+        <div class="slide-content">
+          <div class="slide-number">03 / 06</div>
+          <div class="slide-title">ESP & Tracers</div>
+          <p class="slide-desc">
+            See everything. Player ESP, chest ESP, item ESP — all with customizable colors,
+            fill, and outline thickness. Tracer lines keep targets in sight no matter
+            where they run.
+          </p>
+          <div class="slide-tags">
+            <span class="tag">VISUAL</span>
+            <span class="tag">ESP</span>
+            <span class="tag">CUSTOMIZABLE</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 4 -->
+      <div class="slide" data-index="3">
+        <div class="slide-icon">
+          🎨
+          <div class="corner tl"></div><div class="corner tr"></div>
+          <div class="corner bl"></div><div class="corner br"></div>
+        </div>
+        <div class="slide-content">
+          <div class="slide-number">04 / 06</div>
+          <div class="slide-title">Custom HUD</div>
+          <p class="slide-desc">
+            A fully draggable, modular HUD system. Display your active modules, FPS,
+            ping, armor status, and more. Full RGB color support with gradient and
+            animation options.
+          </p>
+          <div class="slide-tags">
+            <span class="tag">UI</span>
+            <span class="tag">RGB</span>
+            <span class="tag">DRAGGABLE</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 5 -->
+      <div class="slide" data-index="4">
+        <div class="slide-icon">
+          🛡️
+          <div class="corner tl"></div><div class="corner tr"></div>
+          <div class="corner bl"></div><div class="corner br"></div>
+        </div>
+        <div class="slide-content">
+          <div class="slide-number">05 / 06</div>
+          <div class="slide-title">AutoArmor & Totem</div>
+          <p class="slide-desc">
+            Never waste a second micromanaging your gear. AutoArmor equips the best set
+            automatically. AutoTotem keeps a totem in your offhand at all times,
+            making you nearly impossible to kill.
+          </p>
+          <div class="slide-tags">
+            <span class="tag">UTILITY</span>
+            <span class="tag">GEAR</span>
+            <span class="tag">SURVIVAL</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 6 -->
+      <div class="slide" data-index="5">
+        <div class="slide-icon">
+          ⚙️
+          <div class="corner tl"></div><div class="corner tr"></div>
+          <div class="corner bl"></div><div class="corner br"></div>
+        </div>
+        <div class="slide-content">
+          <div class="slide-number">06 / 06</div>
+          <div class="slide-title">ClickGUI</div>
+          <p class="slide-desc">
+            A clean, fast ClickGUI with category tabs, searchable modules, and
+            inline setting sliders. Everything is configurable — keybinds, toggles,
+            and saved presets that load instantly on startup.
+          </p>
+          <div class="slide-tags">
+            <span class="tag">INTERFACE</span>
+            <span class="tag">PRESETS</span>
+            <span class="tag">KEYBINDS</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end .slides -->
+
+    <!-- Slider Controls -->
+    <div class="slider-controls">
+      <button class="slider-btn" id="prevBtn" aria-label="Previous">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="slider-dots" id="dots"></div>
+      <button class="slider-btn" id="nextBtn" aria-label="Next">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CTA -->
+<section id="cta">
+  <h2 class="cta-title">READY TO DOMINATE?</h2>
+  <p class="cta-sub">No install. No setup. Just open and play.</p>
+  <div class="cta-buttons">
+    <a href="https://github.com/sigma-client" class="btn btn-primary" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Download Client
+    </a>
+    <a href="https://clientdevelopment-s.pages.dev" class="btn btn-outline" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+        <circle cx="12" cy="12" r="10"/><polyline points="10 8 16 12 10 16"/>
+      </svg>
+      Play Online
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Σ SIGMA REBORN</div>
+  <div class="footer-note">// NOT AFFILIATED WITH MOJANG OR EAGLERCRAFT TEAM</div>
+</footer>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const dotsContainer = document.getElementById('dots');
+  let current = 0;
+  let isAnimating = false;
+
+  // Build dots
+  slides.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i === 0 ? ' active' : '');
+    dot.addEventListener('click', () => goTo(i));
+    dotsContainer.appendChild(dot);
+  });
+
+  function getDots() { return dotsContainer.querySelectorAll('.dot'); }
+
+  function goTo(next) {
+    if (isAnimating || next === current) return;
+    isAnimating = true;
+
+    const prev = current;
+    slides[prev].classList.add('exit-left');
+    slides[prev].classList.remove('active');
+
+    setTimeout(() => {
+      slides[prev].classList.remove('exit-left');
+      slides[next].classList.add('active');
+      current = next;
+
+      getDots().forEach((d, i) => d.classList.toggle('active', i === current));
+      isAnimating = false;
+    }, 400);
+  }
+
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    goTo((current + 1) % slides.length);
+  });
+
+  document.getElementById('prevBtn').addEventListener('click', () => {
+    goTo((current - 1 + slides.length) % slides.length);
+  });
+
+  // Keyboard navigation
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') goTo((current + 1) % slides.length);
+    if (e.key === 'ArrowLeft')  goTo((current - 1 + slides.length) % slides.length);
+  });
+</script>
+</body>
+</html>
